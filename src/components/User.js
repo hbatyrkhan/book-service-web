@@ -29,7 +29,7 @@ class User extends React.Component {
             })
             console.log('There is no logged in user');
         }
-    });
+      });
     }
     updateInput = e  => {
         /*this.setState({

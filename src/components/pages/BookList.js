@@ -1,9 +1,6 @@
 import React from "react";
-import firebase from "../Firestore";
-import { Container, Image, Row, Col, ListGroup, ListGroupItem, ModalTitle } from "react-bootstrap";
-
-const providerGoogle = new firebase.auth.GoogleAuthProvider();
-const providerGithub = new firebase.auth.GithubAuthProvider();
+import firebase from "../../Firestore";
+import {MDBTableBody} from 'mdbreact';
 
 export class BookItem extends React.Component {
     constructor(props) {
@@ -23,17 +20,20 @@ export class BookItem extends React.Component {
 
     render() {
         return (
-            <Row>
-                <Col sm={{ size: 2, order: 2, offset: 1 }}>
-                    <p>{this.props.index}</p>
-                </Col>
-                <Col sm={{ size: 2, order: 2, offset: 1 }}>
-                    <p>{this.state.title}</p>
-                </Col>
-                <Col sm={{ size: 2, order: 2, offset: 1 }}>
-                    <p>{this.state.author}</p>
-                </Col>
-            </Row>
+            <tr>
+                <td>
+                    {this.props.index}
+                </td>
+                <td>
+                    {this.state.title}
+                </td>
+                <td>
+                    {this.state.author}
+                </td>
+                <td>
+                    {this.state.description}
+                </td>
+            </tr>
         );
     }
 }
@@ -49,11 +49,11 @@ class BookList extends React.Component {
 
     async loadBooks() {
         const db = firebase.firestore();
-        return db.collection('books').where('owner', '==', this.state.user.uid).get()
+        return db.collection('books').where('currentHolder', '==', String(this.state.user.uid)).get()
         .then(snapshot => {
-            var books = [];
+            let books = [];
             snapshot.forEach(doc => {
-                var book = doc.data();
+                let book = doc.data();
                 book.uid = doc.id;
                 books.push(book);
             });
@@ -89,26 +89,20 @@ class BookList extends React.Component {
     render() {
 
         const { user } = this.state;
-        var { books } = this.state;
+        const { books } = this.state;
         
         console.log('Here are the books:', books);
-        
         return (
             <React.Fragment>
-                <Container>
-                    <div><h2>My books</h2></div>
-                    <ListGroup>
+                    <MDBTableBody>
                         {books.map((book, index) => { 
                             return (
-                                <ListGroupItem key={book.uid}>
-                                    <BookItem book={book} index={index + 1} />
-                                </ListGroupItem>
+                                <BookItem book={book} index={index + 1} key={book.uid}/>
                             );
                         })}
-                    </ListGroup>
-                    {user && books.length === 0 && <h5>You have no books.</h5>}
-                    {!user && <h5>Please, log in.</h5>}
-                </Container>
+                    </MDBTableBody>
+                    {user && books.length === 0 && <MDBTableBody><tr><td>You have no books.</td></tr></MDBTableBody>}
+                    {!user && <MDBTableBody><tr><td>Please, log in.</td></tr></MDBTableBody>}
             </React.Fragment>
         );
     }

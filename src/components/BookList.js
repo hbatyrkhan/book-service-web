@@ -1,6 +1,6 @@
 import React from "react";
 import firebase from "../Firestore";
-import { Container, Image, Row, Col, ListGroup, ListGroupItem, ModalTitle } from "react-bootstrap";
+import { Container, Row, Col, ListGroup, ListGroupItem } from "react-bootstrap";
 
 const providerGoogle = new firebase.auth.GoogleAuthProvider();
 const providerGithub = new firebase.auth.GithubAuthProvider();
@@ -87,7 +87,6 @@ class BookList extends React.Component {
         });
     }
     render() {
-
         const { user } = this.state;
         var { books } = this.state;
         

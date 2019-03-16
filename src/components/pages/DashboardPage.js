@@ -37,14 +37,12 @@ class DashboardPage extends React.Component {
         <BreadcrumSection handler={this.handlerInput} />
         {false && <AdminCardSection1 />}
         {false && <ChartSection1 />}
-        <MDBTable striped>
-          <BookList
-            allBooks
-            queryInput={this.state.queryInput}
-            modalBook={this.state.modalBook}
-            toggleBook={this.toggleBook}
-          />
-        </MDBTable>
+        <BookList
+          allBooks
+          queryInput={this.state.queryInput}
+          modalBook={this.state.modalBook}
+          toggleBook={this.toggleBook}
+        />
         <TableSection />
         <ChartSection2 />
         <MDBRow className="mb-4">

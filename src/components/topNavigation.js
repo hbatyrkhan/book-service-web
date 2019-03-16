@@ -227,7 +227,6 @@ class TopNavigation extends Component {
             {this.state.user && (
               <MDBBtn
                 rounded
-                outline
                 color="danger"
                 size="sm"
                 className="border border-light rounded mr-1 nav-link Ripple-parent"

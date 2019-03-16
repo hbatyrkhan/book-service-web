@@ -75,7 +75,7 @@ class BookList extends React.Component {
       () => {
         const tmp_books = [...this.state.books];
         tmp_books.sort(function(item1, item2) {
-          return self.getRelevance(item1) < self.getRelevance(item2);
+          return self.getRelevance(item1) < self.getRelevance(item2) ? 1 : -1;
         });
         this.setState({
           books: tmp_books
@@ -115,7 +115,7 @@ class BookList extends React.Component {
     const self = this;
     const tmp_books = [...this.state.books, book];
     tmp_books.sort(function(item1, item2) {
-      return self.getRelevance(item1) < self.getRelevance(item2);
+      return self.getRelevance(item1) < self.getRelevance(item2) ? 1 : -1;
     });
     this.setState({
       books: tmp_books

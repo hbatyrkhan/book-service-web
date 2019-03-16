@@ -14,7 +14,8 @@ import {
   MDBModalHeader,
   MDBModalBody,
   MDBBtn,
-  MDBIcon
+  MDBIcon,
+  MDBModalFooter
 } from "mdbreact";
 
 const booksInRow = 5;
@@ -101,17 +102,15 @@ export class BookField extends React.Component {
       isEditing: false
     });
 
-    const bookRef = firebase
-      .firestore()
-      .collection("books")
-      .doc(this.props.bookId);
-    bookRef.update({ [this.state.name]: this.state.value }).then(() => {
-      console.log("Book was updated");
-      this.setState({
-        isUpdating: false,
-        isEditing: false
+    this.props
+      .updateBook(this.props.bookId, this.state.name, this.state.value)
+      .then(() => {
+        console.log("Book was updated");
+        this.setState({
+          isUpdating: false,
+          isEditing: false
+        });
       });
-    });
   };
 
   render() {
@@ -169,6 +168,73 @@ export class BookField extends React.Component {
           </MDBCol>
         </MDBRow>
         <br />
+      </React.Fragment>
+    );
+  }
+}
+
+export class BookModal extends React.Component {
+  render() {
+    return (
+      <React.Fragment>
+        {this.props.book != null && (
+          <MDBModal
+            size="lg"
+            isOpen={this.props.isOpen}
+            toggle={this.props.toggle}
+          >
+            <MDBModalHeader toggle={this.props.toggle}>
+              Book Details
+            </MDBModalHeader>
+            <MDBModalBody>
+              <MDBContainer>
+                <React.Fragment>
+                  <BookField
+                    name="title"
+                    label="Title"
+                    value={this.props.book.title}
+                    bookId={this.props.book.uid}
+                    editable={this.props.book.owner === this.props.user.uid}
+                    updateBook={this.props.updateBook}
+                  />
+                  <BookField
+                    name="author"
+                    label="Author"
+                    value={this.props.book.author}
+                    bookId={this.props.book.uid}
+                    editable={this.props.book.owner === this.props.user.uid}
+                    updateBook={this.props.updateBook}
+                  />
+                  <BookField
+                    name="publisher"
+                    label="Publisher"
+                    value={this.props.book.publisher}
+                    bookId={this.props.book.uid}
+                    editable={this.props.book.owner === this.props.user.uid}
+                    updateBook={this.props.updateBook}
+                  />
+                  <BookField
+                    name="description"
+                    label="Description"
+                    value={this.props.book.description}
+                    bookId={this.props.book.uid}
+                    editable={this.props.book.owner === this.props.user.uid}
+                    updateBook={this.props.updateBook}
+                  />
+                </React.Fragment>
+              </MDBContainer>
+            </MDBModalBody>
+            {/* <MDBModalFooter>
+              <MDBBtn
+                disabled={this.state.isUpdating}
+                onClick={this.updateBook}
+                color="primary"
+              >
+                {this.state.isUpdating ? "Updating..." : "Update"}
+              </MDBBtn>
+            </MDBModalFooter> */}
+          </MDBModal>
+        )}
       </React.Fragment>
     );
   }
@@ -241,6 +307,25 @@ class BookList extends React.Component {
       books: tmp_books
     });
   };
+
+  updateBook = (bookId, name, value) => {
+    const bookRef = firebase
+      .firestore()
+      .collection("books")
+      .doc(bookId);
+    return bookRef.update({ [name]: value }).then(() => {
+      const { books } = this.state;
+      for (let i = 0; i < books.length; ++i) {
+        if (books[i].uid === bookId) {
+          books[i][name] = value;
+        }
+      }
+      this.setState({
+        books: books
+      });
+    });
+  };
+
   async loadBooks() {
     const db = firebase.firestore();
     return db
@@ -388,57 +473,13 @@ class BookList extends React.Component {
           {books.length === 0 && user && <p>You have no books.</p>}
           {!user && <p>Please, log in.</p>}
         </MDBContainer>
-        <MDBModal
-          size="lg"
-          isOpen={this.props.modalBook && this.state.bookOpened != null}
+        <BookModal
+          isOpen={this.props.modalBook}
           toggle={this.toggleBook}
-        >
-          <MDBModalHeader toggle={this.toggleBook}>Book Details</MDBModalHeader>
-          <MDBModalBody>
-            <MDBContainer>
-              {this.state.bookOpened != null && (
-                <React.Fragment>
-                  <BookField
-                    name="title"
-                    label="Title"
-                    value={this.state.bookOpened.title}
-                    bookId={this.state.bookOpened.uid}
-                    editable={
-                      this.state.bookOpened.owner === this.state.user.uid
-                    }
-                  />
-                  <BookField
-                    name="author"
-                    label="Author"
-                    value={this.state.bookOpened.author}
-                    bookId={this.state.bookOpened.uid}
-                    editable={
-                      this.state.bookOpened.owner === this.state.user.uid
-                    }
-                  />
-                  <BookField
-                    name="publisher"
-                    label="Publisher"
-                    value={this.state.bookOpened.publisher}
-                    bookId={this.state.bookOpened.uid}
-                    editable={
-                      this.state.bookOpened.owner === this.state.user.uid
-                    }
-                  />
-                  <BookField
-                    name="description"
-                    label="Description"
-                    value={this.state.bookOpened.description}
-                    bookId={this.state.bookOpened.uid}
-                    editable={
-                      this.state.bookOpened.owner === this.state.user.uid
-                    }
-                  />
-                </React.Fragment>
-              )}
-            </MDBContainer>
-          </MDBModalBody>
-        </MDBModal>
+          book={this.state.bookOpened}
+          user={this.state.user}
+          updateBook={this.updateBook}
+        />
       </React.Fragment>
     );
   }

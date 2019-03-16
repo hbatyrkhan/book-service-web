@@ -68,6 +68,7 @@ export class BookField extends React.Component {
       label: this.props.label,
       value: this.props.value,
       oldValue: this.props.value,
+      editable: this.props.editable,
       isEditing: false,
       isUpdating: false
     };
@@ -121,7 +122,7 @@ export class BookField extends React.Component {
             <p>{this.state.label}:</p>
           </MDBCol>
           <MDBCol>
-            {this.state.isEditing ? (
+            {this.state.isEditing && this.state.editable ? (
               <MDBRow>
                 <MDBCol>
                   <input
@@ -152,15 +153,17 @@ export class BookField extends React.Component {
             ) : (
               <MDBRow>
                 <MDBCol>{this.state.value}</MDBCol>
-                <MDBCol>
-                  {this.state.isUpdating ? (
-                    <MDBBtn disabled={true} color="primary">
-                      Updating...
-                    </MDBBtn>
-                  ) : (
-                    <MDBIcon onClick={this.toggleEdit} icon="edit" />
-                  )}
-                </MDBCol>
+                {this.state.editable && (
+                  <MDBCol>
+                    {this.state.isUpdating ? (
+                      <MDBBtn disabled={true} color="primary">
+                        Updating...
+                      </MDBBtn>
+                    ) : (
+                      <MDBIcon onClick={this.toggleEdit} icon="edit" />
+                    )}
+                  </MDBCol>
+                )}
               </MDBRow>
             )}
           </MDBCol>
@@ -400,24 +403,36 @@ class BookList extends React.Component {
                     label="Title"
                     value={this.state.bookOpened.title}
                     bookId={this.state.bookOpened.uid}
+                    editable={
+                      this.state.bookOpened.owner === this.state.user.uid
+                    }
                   />
                   <BookField
                     name="author"
                     label="Author"
                     value={this.state.bookOpened.author}
                     bookId={this.state.bookOpened.uid}
+                    editable={
+                      this.state.bookOpened.owner === this.state.user.uid
+                    }
                   />
                   <BookField
                     name="publisher"
                     label="Publisher"
                     value={this.state.bookOpened.publisher}
                     bookId={this.state.bookOpened.uid}
+                    editable={
+                      this.state.bookOpened.owner === this.state.user.uid
+                    }
                   />
                   <BookField
                     name="description"
                     label="Description"
                     value={this.state.bookOpened.description}
                     bookId={this.state.bookOpened.uid}
+                    editable={
+                      this.state.bookOpened.owner === this.state.user.uid
+                    }
                   />
                 </React.Fragment>
               )}

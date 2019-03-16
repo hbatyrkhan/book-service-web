@@ -9,7 +9,8 @@ import {
   MDBCollapse,
   MDBNavItem,
   MDBNavLink,
-  MDBIcon
+  MDBIcon,
+  MDBBtn
 } from "mdbreact";
 import firebase from "../Firestore";
 const providerGoogle = new firebase.auth.GoogleAuthProvider();
@@ -224,14 +225,16 @@ class TopNavigation extends Component {
               </MDBNavItem>
             )}
             {this.state.user && (
-              <MDBNavItem>
-                <span
-                  className="border border-light rounded mr-1 nav-link Ripple-parent"
-                  onClick={this.signOut}
-                >
-                  logout
-                </span>
-              </MDBNavItem>
+              <MDBBtn
+                rounded
+                outline
+                color="danger"
+                size="sm"
+                className="border border-light rounded mr-1 nav-link Ripple-parent"
+                onClick={this.signOut}
+              >
+                logout
+              </MDBBtn>
             )}
           </MDBNavbarNav>
         </MDBCollapse>

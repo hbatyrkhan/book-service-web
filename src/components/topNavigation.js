@@ -49,7 +49,7 @@ class TopNavigation extends Component {
       .signInWithPopup(providerGoogle)
       .then(function(result) {
         const user = result.user;
-        // console.log(user);
+        console.log(user.photoURL);
         //   console.log(user.uid);
         self.addUser(user);
         toast.success("Successfully logged in", { position: "top-right" });
@@ -118,7 +118,8 @@ class TopNavigation extends Component {
             .add({
               fullname: String(user.displayName),
               email: String(user.email),
-              uid: String(user.uid)
+              uid: String(user.uid),
+              photoURL: String(user.photoURL)
             })
             .then(function(docRef) {
               console.log("Document written with ID: ", docRef.id);

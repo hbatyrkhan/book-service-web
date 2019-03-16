@@ -67,21 +67,23 @@ class BookList extends React.Component {
     };
   }
   componentWillReceiveProps(nextProps) {
-    const self = this;
-    this.setState(
-      {
-        queryInput: nextProps.queryInput
-      },
-      () => {
-        const tmp_books = [...this.state.books];
-        tmp_books.sort(function(item1, item2) {
-          return self.getRelevance(item1) < self.getRelevance(item2) ? 1 : -1;
-        });
-        this.setState({
-          books: tmp_books
-        });
-      }
-    );
+    if (this.props.queryInput !== nextProps.queryInput) {
+      const self = this;
+      this.setState(
+        {
+          queryInput: nextProps.queryInput
+        },
+        () => {
+          const tmp_books = [...this.state.books];
+          tmp_books.sort(function(item1, item2) {
+            return self.getRelevance(item1) < self.getRelevance(item2) ? 1 : -1;
+          });
+          this.setState({
+            books: tmp_books
+          });
+        }
+      );
+    }
   }
   common_subs = arr1 => {
     let i = 0,

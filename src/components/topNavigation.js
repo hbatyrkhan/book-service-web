@@ -147,37 +147,19 @@ class TopNavigation extends Component {
         <MDBCollapse isOpen={this.state.collapse} navbar>
           <MDBNavbarNav left>
             <MDBNavItem active>
-              <MDBNavLink to="#">Home</MDBNavLink>
+              <MDBNavLink to="/">Home</MDBNavLink>
             </MDBNavItem>
             <MDBNavItem>
-              <a
-                rel="noopener noreferrer"
-                className="nav-link Ripple-parent"
-                href="https://mdbootstrap.com/docs/react/"
-                target="_blank"
-              >
-                About MDB
-              </a>
+              <MDBNavLink to="/profile">Profile</MDBNavLink>
             </MDBNavItem>
             <MDBNavItem>
-              <a
-                rel="noopener noreferrer"
-                className="nav-link Ripple-parent"
-                href="https://mdbootstrap.com/docs/react/getting-started/download/"
-                target="_blank"
-              >
-                Free download
-              </a>
+              <MDBNavLink to="/books">Books</MDBNavLink>
             </MDBNavItem>
             <MDBNavItem>
-              <a
-                rel="noopener noreferrer"
-                className="nav-link Ripple-parent"
-                href="https://mdbootstrap.com/bootstrap-tutorial/"
-                target="_blank"
-              >
-                Free tutorials
-              </a>
+              <MDBNavLink to="/maps">Maps</MDBNavLink>
+            </MDBNavItem>
+            <MDBNavItem>
+              <MDBNavLink to="/404">404 Page</MDBNavLink>
             </MDBNavItem>
           </MDBNavbarNav>
           <MDBNavbarNav right>

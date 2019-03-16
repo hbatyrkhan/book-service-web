@@ -15,6 +15,8 @@ import {
   MDBModalBody
 } from "mdbreact";
 
+const booksInRow = 5;
+
 export class BookCard extends React.Component {
   constructor(props) {
     super(props);
@@ -221,6 +223,8 @@ class BookList extends React.Component {
     for (let i = 0; i < arr.length; i += len) {
       res.push(arr.slice(i, Math.min(i + len, arr.length)));
     }
+    while (res.length > 0 && res[res.length - 1].length % len != 0)
+      res[res.length - 1].push(null);
     return res;
   };
 
@@ -234,19 +238,25 @@ class BookList extends React.Component {
   render() {
     const { user } = this.state;
     const { books } = this.state;
-    const splitBooks = this.split(books, 4);
+    const splitBooks = this.split(books, booksInRow);
 
     const bookCardsTable = splitBooks.map(block => {
       return (
         <div key={block[0].uid}>
           <MDBRow>
-            {block.map(book => {
+            {block.map((book, index) => {
               return (
-                <BookCard
-                  toggleBook={this.toggleBook}
-                  book={book}
-                  key={book.uid}
-                />
+                <React.Fragment key={book === null ? index : book.uid}>
+                  {book != null ? (
+                    <BookCard
+                      toggleBook={this.toggleBook}
+                      book={book}
+                      key={book.uid}
+                    />
+                  ) : (
+                    <MDBCol />
+                  )}
+                </React.Fragment>
               );
             })}
           </MDBRow>
@@ -257,7 +267,7 @@ class BookList extends React.Component {
 
     return (
       <React.Fragment>
-        <MDBContainer>
+        <MDBContainer className="flex-wrap">
           {bookCardsTable}
           {books.length === 0 && user && <p>You have no books.</p>}
           {!user && <p>Please, log in.</p>}

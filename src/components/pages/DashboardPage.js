@@ -14,14 +14,23 @@ class DashboardPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      queryInput: ""
+      queryInput: "",
+      modalBook: false
     };
   }
+
   handlerInput = value => {
     this.setState({
       queryInput: value
     });
   };
+
+  toggleBook = () => {
+    this.setState({
+      modalBook: !this.state.modalBook
+    });
+  };
+
   render() {
     return (
       <React.Fragment>
@@ -29,7 +38,12 @@ class DashboardPage extends React.Component {
         {false && <AdminCardSection1 />}
         {false && <ChartSection1 />}
         <MDBTable striped>
-          <BookList allBooks queryInput={this.state.queryInput} />
+          <BookList
+            allBooks
+            queryInput={this.state.queryInput}
+            modalBook={this.state.modalBook}
+            toggleBook={this.toggleBook}
+          />
         </MDBTable>
         <TableSection />
         <ChartSection2 />

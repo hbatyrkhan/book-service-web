@@ -10,6 +10,7 @@ import {
   MDBTableBody
 } from "mdbreact";
 import BookList from "./BookList";
+import BookAddForm from "../BookAdd";
 
 const TablesPage = () => {
   return (
@@ -18,9 +19,10 @@ const TablesPage = () => {
         <MDBCol md="12">
           <MDBCard className="mt-5">
             <MDBView className="gradient-card-header blue darken-2">
-              <h4 className="h4-responsive text-white">Books</h4>
+              <h4 className="h4-responsive text-white">Basic tables</h4>
             </MDBView>
             <MDBCardBody>
+              <BookAddForm />
               <h3 className="mt-5 text-left">
                 <strong>Currently you have these books in your account:</strong>
               </h3>

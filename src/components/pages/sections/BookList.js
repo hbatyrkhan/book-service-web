@@ -174,6 +174,27 @@ export class BookField extends React.Component {
 }
 
 export class BookModal extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isDeleting: false
+    };
+  }
+
+  deleteBook = () => {
+    console.log("Deleting the book!");
+    this.setState({
+      isDeleting: true
+    });
+
+    this.props.deleteBook(this.props.book.uid).then(() => {
+      this.setState({
+        isDeleting: false
+      });
+      this.props.toggle();
+    });
+  };
+
   render() {
     return (
       <React.Fragment>
@@ -224,15 +245,15 @@ export class BookModal extends React.Component {
                 </React.Fragment>
               </MDBContainer>
             </MDBModalBody>
-            {/* <MDBModalFooter>
+            <MDBModalFooter>
               <MDBBtn
-                disabled={this.state.isUpdating}
-                onClick={this.updateBook}
-                color="primary"
+                disabled={this.state.isDeleting}
+                onClick={this.deleteBook}
+                color="danger"
               >
-                {this.state.isUpdating ? "Updating..." : "Update"}
+                {this.state.isDeleting ? "Deleting..." : "Delete"}
               </MDBBtn>
-            </MDBModalFooter> */}
+            </MDBModalFooter>
           </MDBModal>
         )}
       </React.Fragment>
@@ -318,6 +339,25 @@ class BookList extends React.Component {
       for (let i = 0; i < books.length; ++i) {
         if (books[i].uid === bookId) {
           books[i][name] = value;
+        }
+      }
+      this.setState({
+        books: books
+      });
+    });
+  };
+
+  deleteBook = bookId => {
+    const bookRef = firebase
+      .firestore()
+      .collection("books")
+      .doc(bookId);
+    return bookRef.delete().then(() => {
+      const { books } = this.state;
+      for (let i = 0; i < books.length; ++i) {
+        if (books[i].uid === bookId) {
+          books.splice(i, 1);
+          break;
         }
       }
       this.setState({
@@ -479,6 +519,7 @@ class BookList extends React.Component {
           book={this.state.bookOpened}
           user={this.state.user}
           updateBook={this.updateBook}
+          deleteBook={this.deleteBook}
         />
       </React.Fragment>
     );

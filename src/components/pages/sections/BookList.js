@@ -12,7 +12,9 @@ import {
   Input,
   MDBModal,
   MDBModalHeader,
-  MDBModalBody
+  MDBModalBody,
+  MDBBtn,
+  MDBIcon
 } from "mdbreact";
 
 const booksInRow = 5;
@@ -54,6 +56,117 @@ export class BookCard extends React.Component {
           </MDBCardBody>
         </MDBCard>
       </MDBCol>
+    );
+  }
+}
+
+export class BookField extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      name: this.props.name,
+      label: this.props.label,
+      value: this.props.value,
+      oldValue: this.props.value,
+      isEditing: false,
+      isUpdating: false
+    };
+  }
+
+  handleChange = e => {
+    this.setState({
+      [e.target.name]: e.target.value
+    });
+  };
+
+  toggleEdit = () => {
+    this.setState({
+      oldValue: this.state.isEditing ? this.state.oldValue : this.state.value,
+      isEditing: !this.state.isEditing
+    });
+  };
+
+  cancelEdit = () => {
+    this.setState({
+      value: this.state.oldValue,
+      isEditing: false
+    });
+  };
+
+  updateBook = () => {
+    console.log("Updating the book");
+    this.setState({
+      isUpdating: true,
+      isEditing: false
+    });
+
+    const bookRef = firebase
+      .firestore()
+      .collection("books")
+      .doc(this.props.bookId);
+    bookRef.update({ [this.state.name]: this.state.value }).then(() => {
+      console.log("Book was updated");
+      this.setState({
+        isUpdating: false,
+        isEditing: false
+      });
+    });
+  };
+
+  render() {
+    return (
+      <React.Fragment>
+        <MDBRow>
+          <MDBCol size="2" className="grey-text">
+            <p>{this.state.label}:</p>
+          </MDBCol>
+          <MDBCol>
+            {this.state.isEditing ? (
+              <MDBRow>
+                <MDBCol>
+                  <input
+                    value={this.state.value}
+                    name="value"
+                    onChange={this.handleChange}
+                    type="text"
+                    className="form-control"
+                  />
+                </MDBCol>
+                <MDBCol>
+                  <MDBBtn
+                    disabled={this.state.isUpdating}
+                    onClick={this.updateBook}
+                    color="primary"
+                  >
+                    {this.state.isUpdating ? "Updating..." : "Update"}
+                  </MDBBtn>
+                  <MDBBtn
+                    disabled={this.state.isUpdating}
+                    onClick={this.cancelEdit}
+                    color="grey"
+                  >
+                    Cancel
+                  </MDBBtn>
+                </MDBCol>
+              </MDBRow>
+            ) : (
+              <MDBRow>
+                <MDBCol>{this.state.value}</MDBCol>
+                <MDBCol>
+                  {this.state.isUpdating ? (
+                    <MDBBtn disabled={true} color="primary">
+                      Updating...
+                    </MDBBtn>
+                  ) : (
+                    <MDBIcon onClick={this.toggleEdit} icon="edit" />
+                  )}
+                </MDBCol>
+              </MDBRow>
+            )}
+          </MDBCol>
+        </MDBRow>
+        <br />
+      </React.Fragment>
     );
   }
 }
@@ -280,47 +393,34 @@ class BookList extends React.Component {
           <MDBModalHeader toggle={this.toggleBook}>Book Details</MDBModalHeader>
           <MDBModalBody>
             <MDBContainer>
-              <MDBRow>
-                <MDBCol size="2" className="grey-text">
-                  Title:
-                </MDBCol>
-                <MDBCol>
-                  {this.state.bookOpened != null && this.state.bookOpened.title}
-                </MDBCol>
-              </MDBRow>
-              <br />
-
-              <MDBRow>
-                <MDBCol size="2" className="grey-text">
-                  Author:
-                </MDBCol>
-                <MDBCol>
-                  {this.state.bookOpened != null &&
-                    this.state.bookOpened.author}
-                </MDBCol>
-              </MDBRow>
-              <br />
-
-              <MDBRow>
-                <MDBCol size="2" className="grey-text">
-                  Publisher:
-                </MDBCol>
-                <MDBCol>
-                  {this.state.bookOpened != null &&
-                    this.state.bookOpened.publisher}
-                </MDBCol>
-              </MDBRow>
-              <br />
-
-              <MDBRow>
-                <MDBCol size="2" className="grey-text">
-                  Description:
-                </MDBCol>
-                <MDBCol>
-                  {this.state.bookOpened != null &&
-                    this.state.bookOpened.description}
-                </MDBCol>
-              </MDBRow>
+              {this.state.bookOpened != null && (
+                <React.Fragment>
+                  <BookField
+                    name="title"
+                    label="Title"
+                    value={this.state.bookOpened.title}
+                    bookId={this.state.bookOpened.uid}
+                  />
+                  <BookField
+                    name="author"
+                    label="Author"
+                    value={this.state.bookOpened.author}
+                    bookId={this.state.bookOpened.uid}
+                  />
+                  <BookField
+                    name="publisher"
+                    label="Publisher"
+                    value={this.state.bookOpened.publisher}
+                    bookId={this.state.bookOpened.uid}
+                  />
+                  <BookField
+                    name="description"
+                    label="Description"
+                    value={this.state.bookOpened.description}
+                    bookId={this.state.bookOpened.uid}
+                  />
+                </React.Fragment>
+              )}
             </MDBContainer>
           </MDBModalBody>
         </MDBModal>

@@ -80,12 +80,13 @@ class TopNavigation extends Component {
     });
   };
   signOut = e => {
+    const self = this;
     firebase
       .auth()
       .signOut()
       .then(function() {
         // Sign-out successful.
-        this.setState(
+        self.setState(
           {
             user: null
           },
@@ -96,7 +97,7 @@ class TopNavigation extends Component {
       })
       .catch(function(error) {
         // An error happened.
-        toast.error("Logged out", { position: "top-right" });
+        toast.error(error.message, { autoClose: 4000 });
       });
   };
   addUser = user => {

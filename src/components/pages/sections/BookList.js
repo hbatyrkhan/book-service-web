@@ -62,10 +62,65 @@ class BookList extends React.Component {
     this.state = {
       user: null,
       books: [],
-      bookOpened: null
+      bookOpened: null,
+      queryInput: ""
     };
   }
-
+  componentWillReceiveProps(nextProps) {
+    const self = this;
+    this.setState(
+      {
+        queryInput: nextProps.queryInput
+      },
+      () => {
+        const tmp_books = [...this.state.books];
+        tmp_books.sort(function(item1, item2) {
+          return self.getRelevance(item1) < self.getRelevance(item2);
+        });
+        this.setState({
+          books: tmp_books
+        });
+      }
+    );
+  }
+  common_subs = arr1 => {
+    let i = 0,
+      res = 0;
+    const L = arr1[0].length;
+    for (const key of arr1[1].toLowerCase()) {
+      if (i < L && key === arr1[0].toLowerCase().charAt(i)) {
+        i++;
+      } else {
+        res = Math.max(i, res);
+        i = 0;
+      }
+    }
+    res = Math.max(i, res);
+    if (res === L) res += res;
+    return res;
+  };
+  getRelevance = curBook => {
+    const queryInput = this.state.queryInput;
+    // console.log(queryInput);
+    return (
+      this.common_subs([queryInput, curBook.title]) +
+      this.common_subs([queryInput, curBook.author]) +
+      this.common_subs([queryInput, curBook.description])
+    );
+  };
+  loadBook = snapshot => {
+    let book = snapshot.data();
+    //   console.log("Book ", book);
+    book.uid = snapshot.id;
+    const self = this;
+    const tmp_books = [...this.state.books, book];
+    tmp_books.sort(function(item1, item2) {
+      return self.getRelevance(item1) < self.getRelevance(item2);
+    });
+    this.setState({
+      books: tmp_books
+    });
+  };
   async loadBooks() {
     const db = firebase.firestore();
     return db
@@ -73,16 +128,7 @@ class BookList extends React.Component {
       .where(String(this.props.userType), "==", String(this.state.user.uid))
       .get()
       .then(snapshot => {
-        let books = [];
-        snapshot.forEach(doc => {
-          let book = doc.data();
-          book.uid = doc.id;
-          books.push(book);
-        });
-
-        this.setState({
-          books: books
-        });
+        snapshot.forEach(this.loadBook);
       })
       .catch(err => {
         console.log("Error getting document from books collection", err);
@@ -94,28 +140,38 @@ class BookList extends React.Component {
   }
   async loadMarkedBooks() {
     const db = firebase.firestore();
-    this.state.user.markedBooks.forEach(bookId => {
-      db.collection("books")
-        .doc(String(bookId))
-        .get()
-        .then(loadBook => {
-          let book = loadBook.data();
-          //   console.log("Book ", book);
-          book.uid = bookId;
-          this.setState({
-            books: [...this.state.books, book]
-          });
-        })
-        .catch(err => {
-          console.log("Error getting document from books collection", err);
+    if ("markedBooks" in this.state.user) {
+      this.state.user.markedBooks.forEach(bookId => {
+        db.collection("books")
+          .doc(String(bookId))
+          .get()
+          .then(this.loadBook)
+          .catch(err => {
+            console.log("Error getting document from books collection", err);
 
-          this.setState({
-            books: []
+            this.setState({
+              books: []
+            });
           });
-        });
-    });
+      });
+    }
   }
+  async loadAllBooks() {
+    const db = firebase.firestore();
+    return db
+      .collection("books")
+      .get()
+      .then(snapshot => {
+        snapshot.forEach(this.loadBook);
+      })
+      .catch(err => {
+        console.log("Error getting document from books collection", err);
 
+        this.setState({
+          books: []
+        });
+      });
+  }
   componentDidMount() {
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
@@ -133,6 +189,8 @@ class BookList extends React.Component {
                 () => {
                   if (this.props.markedBooks) {
                     this.loadMarkedBooks();
+                  } else if (this.props.allBooks) {
+                    this.loadAllBooks();
                   } else {
                     this.loadBooks();
                   }

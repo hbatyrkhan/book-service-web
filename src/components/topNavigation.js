@@ -96,6 +96,7 @@ class TopNavigation extends Component {
       })
       .catch(function(error) {
         // An error happened.
+        toast.error("Logged out", { position: "top-right" });
       });
   };
   addUser = user => {

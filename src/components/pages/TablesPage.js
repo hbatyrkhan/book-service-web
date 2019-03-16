@@ -9,8 +9,8 @@ import {
   MDBTableHead,
   MDBTableBody
 } from "mdbreact";
-import BookList from "./BookList";
-import BookAddForm from "../BookAdd";
+import BookList from "./sections/BookList";
+import BookAddForm from "./sections/BookAdd";
 
 const TablesPage = () => {
   return (

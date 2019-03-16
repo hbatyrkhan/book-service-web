@@ -1,5 +1,5 @@
 import React from "react";
-import firebase from "../Firestore";
+import firebase from "../../../Firestore";
 import { toast, MDBBtn, MDBContainer } from "mdbreact";
 
 const providerGoogle = new firebase.auth.GoogleAuthProvider();

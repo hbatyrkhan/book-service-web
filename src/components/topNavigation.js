@@ -85,9 +85,14 @@ class TopNavigation extends Component {
       .signOut()
       .then(function() {
         // Sign-out successful.
-        this.setState({
-          user: null
-        });
+        this.setState(
+          {
+            user: null
+          },
+          () => {
+            toast.success("Logged out", { position: "top-right" });
+          }
+        );
       })
       .catch(function(error) {
         // An error happened.

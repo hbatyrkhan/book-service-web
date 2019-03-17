@@ -222,7 +222,7 @@ export class BookModal extends React.Component {
   deleteRequest = () => {
     return firebase
       .firestore()
-      .collection("requests")
+      .collection(String(this.props.book.type))
       .doc(String(this.props.book.reqId))
       .delete()
       .then(() => {
@@ -281,6 +281,18 @@ export class BookModal extends React.Component {
       askingBook: true
     });
     this.props.askBook(this.props.book).then(() => {
+      this.setState({
+        askingBook: false
+      });
+      this.props.toggle();
+    });
+  };
+  askBookRet = () => {
+    console.log("Asking book for return");
+    this.setState({
+      askingBook: true
+    });
+    this.props.askBookRet(this.props.book).then(() => {
       this.setState({
         askingBook: false
       });
@@ -351,6 +363,19 @@ export class BookModal extends React.Component {
                       : "Request the book"}
                   </MDBBtn>
                 )}
+              {this.props.user.uid == this.props.book.currentHolder &&
+                this.props.book.owner != this.props.book.currentHolder &&
+                this.props.askBookRet && (
+                  <MDBBtn
+                    disabled={this.state.askingBook}
+                    onClick={this.askBookRet}
+                    color="unique"
+                  >
+                    {this.state.gettingBook
+                      ? "Requesting..."
+                      : "Return the book"}
+                  </MDBBtn>
+                )}
               {this.props.book.person && (
                 <MDBBtn
                   disabled={this.state.accepting}
@@ -366,7 +391,7 @@ export class BookModal extends React.Component {
                   onClick={this.rejectBook}
                   color="pink"
                 >
-                  {this.state.accepting ? "Rejecting..." : "Reject the request"}
+                  {this.state.rejecting ? "Rejecting..." : "Reject the request"}
                 </MDBBtn>
               )}
               {this.props.user.uid == this.props.book.owner &&
@@ -507,8 +532,25 @@ class BookList extends React.Component {
       .doc()
       .set({
         bookId: book.uid,
-        newHolderId: this.state.user.uid,
-        ownerId: book.owner
+        newHolderUserId: this.state.user.uid,
+        ownerUserId: book.owner
+      })
+      .then(() => {
+        console.log("requested!");
+      })
+      .catch(err => {
+        console.log(err.message);
+      });
+  };
+  askBookRet = book => {
+    return firebase
+      .firestore()
+      .collection("returnRequests")
+      .doc()
+      .set({
+        bookId: book.uid,
+        currentUserId: this.state.user.uid,
+        ownerUserId: book.owner
       })
       .then(() => {
         console.log("requested!");
@@ -602,11 +644,12 @@ class BookList extends React.Component {
         });
       });
   }
-  loadReqBooks = () => {
+  loadReqBooks = type => {
+    const ownerId = "ownerUserId";
     firebase
       .firestore()
-      .collection("requests")
-      .where("ownerId", "==", String(this.state.user.uid))
+      .collection(String(type))
+      .where(String(ownerId), "==", String(this.state.user.uid))
       .get()
       .then(reqs => {
         reqs.forEach(req => {
@@ -618,8 +661,13 @@ class BookList extends React.Component {
             .then(book => {
               let new_book = book.data();
               new_book.uid = book.id;
-              new_book.person = req.data().newHolderId;
+              if (type == "requests") {
+                new_book.person = req.data().newHolderUserId;
+              } else {
+                new_book.person = req.data().ownerUserId;
+              }
               new_book.reqId = req.id;
+              new_book.type = type;
               this.setState({
                 books: [...this.state.books, new_book]
               });
@@ -649,7 +697,8 @@ class BookList extends React.Component {
                 },
                 () => {
                   if (this.props.reqBooks) {
-                    this.loadReqBooks();
+                    this.loadReqBooks("returnRequests");
+                    this.loadReqBooks("requests");
                   } else if (this.props.markedBooks) {
                     this.loadMarkedBooks();
                   } else if (this.props.allBooks) {
@@ -739,6 +788,7 @@ class BookList extends React.Component {
           deleteBook={this.deleteBook}
           getBook={this.getBook}
           askBook={this.askBook}
+          askBookRet={this.askBookRet}
           acceptBook={this.acceptBook}
         />
       </React.Fragment>

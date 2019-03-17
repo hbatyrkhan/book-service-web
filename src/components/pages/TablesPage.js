@@ -10,8 +10,7 @@ class TablesPage extends React.Component {
 
     this.state = {
       modalBook: false,
-      user: null,
-      subscription: null
+      user: null
     };
   }
   componentDidMount() {
@@ -27,36 +26,7 @@ class TablesPage extends React.Component {
             new_user.forEach(data => {
               this.setState(
                 {
-                  user: data.data(),
-                  subscription: firebase
-                    .firestore()
-                    .collection("notifications")
-                    .onSnapshot(function(snapshot) {
-                      console.log("triggered...", snapshot.docChanges());
-
-                      snapshot.docChanges().forEach(doc => {
-                        // console.log("Current data: ", doc.type, doc.doc.data());
-                        // console.log(doc.doc.data().toUser, data.data().uid);
-                        // console.log(doc.doc.data().isRead);
-                        if (doc.type === "added") {
-                          if (
-                            doc.doc.data().toUser === data.data().uid &&
-                            doc.doc.data().isRead === false
-                          ) {
-                            toast.info(
-                              doc.doc.data().fromUser +
-                                ": " +
-                                doc.doc.data().message,
-                              {
-                                autoClose: false
-                              }
-                            );
-                            console.log("Should have seen this notify action");
-                            self.readDelNotification(doc.doc.id);
-                          }
-                        }
-                      });
-                    })
+                  user: data.data()
                 },
                 () => {}
               );
@@ -75,28 +45,7 @@ class TablesPage extends React.Component {
       }
     });
   }
-  componentWillUnmount() {
-    console.log("Unmounting...");
-    if (this.state.subscription) {
-      this.state.subscription();
-    }
-    this.setState({
-      subscription: null
-    });
-  }
-  readDelNotification = id => {
-    firebase
-      .firestore()
-      .collection("notifications")
-      .doc(id)
-      .delete()
-      .then(() => {
-        console.log("Changed!!!");
-      })
-      .catch(err => {
-        console.log(err.message);
-      });
-  };
+  componentWillUnmount() {}
   toggleBook = () => {
     this.setState({
       modalBook: !this.state.modalBook

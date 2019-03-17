@@ -19,24 +19,92 @@ const providerGithub = new firebase.auth.GithubAuthProvider();
 class TopNavigation extends Component {
   state = {
     collapse: false,
-    user: null
+    user: null,
+    subscription: null
   };
   componentDidMount() {
+    const self = this;
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
-        //   console.log('This is the user: ', user);
-        this.setState({
-          user: user
-        });
+        firebase
+          .firestore()
+          .collection("users")
+          .where("uid", "==", String(user.uid))
+          .get()
+          .then(new_user => {
+            new_user.forEach(data => {
+              this.setState(
+                {
+                  user: data.data(),
+                  subscription: firebase
+                    .firestore()
+                    .collection("notifications")
+                    .onSnapshot(function(snapshot) {
+                      console.log("triggered...", snapshot.docChanges());
+
+                      snapshot.docChanges().forEach(doc => {
+                        // console.log("Current data: ", doc.type, doc.doc.data());
+                        // console.log(doc.doc.data().toUser, data.data().uid);
+                        // console.log(doc.doc.data().isRead);
+                        if (doc.type === "added") {
+                          if (
+                            doc.doc.data().toUser === data.data().uid &&
+                            doc.doc.data().isRead === false
+                          ) {
+                            toast.info(
+                              doc.doc.data().fromUser +
+                                ": " +
+                                doc.doc.data().message,
+                              {
+                                autoClose: false
+                              }
+                            );
+                            console.log("Should have seen this notify action");
+                            self.readDelNotification(doc.doc.id);
+                          }
+                        }
+                      });
+                    })
+                },
+                () => {}
+              );
+            });
+          })
+          .catch(err => {
+            console.log("Error user from users collection", err);
+            this.setState({
+              user: null
+            });
+          });
       } else {
-        // No user is signed in.
         this.setState({
           user: null
         });
-        //   console.log('There is no logged in user');
       }
     });
   }
+  componentWillUnmount() {
+    console.log("Unmounting...");
+    if (this.state.subscription) {
+      this.state.subscription();
+    }
+    this.setState({
+      subscription: null
+    });
+  }
+  readDelNotification = id => {
+    firebase
+      .firestore()
+      .collection("notifications")
+      .doc(id)
+      .delete()
+      .then(() => {
+        console.log("Changed!!!");
+      })
+      .catch(err => {
+        console.log(err.message);
+      });
+  };
   onClick = () => {
     this.setState({
       collapse: !this.state.collapse
@@ -205,7 +273,7 @@ class TopNavigation extends Component {
             {this.state.user && (
               <MDBNavItem>
                 <span className="nav-link navbar-link">
-                  Hello, {this.state.user.displayName}
+                  Hello, {this.state.user.fullname}
                 </span>
               </MDBNavItem>
             )}

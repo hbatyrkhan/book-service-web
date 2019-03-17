@@ -26,7 +26,8 @@ export class BookCard extends React.Component {
 
     this.state = {
       book: this.props.book,
-      currentHolder: ""
+      currentHolder: "",
+      owner: ""
     };
   }
 
@@ -40,6 +41,21 @@ export class BookCard extends React.Component {
         snapshot.forEach(data => {
           this.setState({
             currentHolder: data.data().fullname
+          });
+        });
+      })
+      .catch(err => {
+        console.log(err.message);
+      });
+    firebase
+      .firestore()
+      .collection("users")
+      .where("uid", "==", this.props.book.owner)
+      .get()
+      .then(snapshot => {
+        snapshot.forEach(data => {
+          this.setState({
+            owner: data.data().fullname
           });
         });
       })
@@ -63,7 +79,7 @@ export class BookCard extends React.Component {
       <MDBCol>
         <MDBCard
           onClick={this.toggleBook}
-          style={{ height: "23rem", width: "12rem" }}
+          style={{ height: "30rem", width: "12rem" }}
         >
           <MDBCardBody>
             <h5 className="font-weight-bold mb-3">
@@ -71,6 +87,9 @@ export class BookCard extends React.Component {
             </h5>
             <p className="font-weight-bold grey-text">
               current user: {this.state.currentHolder}
+            </p>
+            <p className="font-weight-bold grey-text">
+              Owner: {this.state.owner}
             </p>
             <MDBCardText>
               {this.shortText(this.state.book.description)}

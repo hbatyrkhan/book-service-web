@@ -32,7 +32,7 @@ class BreadcrumSection extends React.Component {
         >
           <MDBBreadcrumb>
             <MDBBreadcrumbItem>Home</MDBBreadcrumbItem>
-            <MDBBreadcrumbItem active>Dashboard</MDBBreadcrumbItem>
+            <MDBBreadcrumbItem active>All Books</MDBBreadcrumbItem>
           </MDBBreadcrumb>
           <MDBFormInline className="md-form m-0">
             <input

@@ -11,19 +11,31 @@ import {
   MDBCardText,
   MDBCardFooter,
   MDBBtn,
-  MDBIcon
+  MDBIcon,
+  toast
 } from "mdbreact";
 import src1 from "../../assets/img-1.jpg";
 import firebase from "../../Firestore";
+import BookList from "./sections/BookList";
 
 class ProfilePage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      user: null
+      user: null,
+      subscription: null,
+      requests: [],
+      books: [],
+      modalBook: false
     };
   }
+  toggleBook = () => {
+    this.setState({
+      modalBook: !this.state.modalBook
+    });
+  };
   componentDidMount() {
+    const self = this;
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
         firebase
@@ -33,28 +45,79 @@ class ProfilePage extends React.Component {
           .get()
           .then(new_user => {
             new_user.forEach(data => {
-              this.setState({
-                user: data.data()
-              });
+              this.setState(
+                {
+                  user: data.data(),
+                  subscription: firebase
+                    .firestore()
+                    .collection("notifications")
+                    .onSnapshot(function(snapshot) {
+                      console.log("triggered...", snapshot.docChanges());
+
+                      snapshot.docChanges().forEach(doc => {
+                        console.log("Current data: ", doc.type, doc.doc.data());
+                        console.log(doc.doc.data().toUser, data.data().uid);
+                        console.log(doc.doc.data().isRead);
+                        if (doc.type === "added") {
+                          if (
+                            doc.doc.data().toUser === data.data().uid &&
+                            doc.doc.data().isRead === false
+                          ) {
+                            toast.info(
+                              doc.doc.data().fromUser +
+                                ": " +
+                                doc.doc.data().message,
+                              {
+                                autoClose: false
+                              }
+                            );
+                            console.log("Should have seen this notify action");
+                            self.readDelNotification(doc.doc.id);
+                          }
+                        }
+                      });
+                    })
+                },
+                () => {}
+              );
             });
           })
           .catch(err => {
-            console.log(err.message);
+            // console.log("Error user from users collection", err);
             this.setState({
               user: null
             });
           });
       } else {
-        console.log("Could not log in");
         this.setState({
           user: null
         });
       }
     });
   }
+  componentWillUnmount() {
+    console.log("Unmounting...");
+    if (this.state.subscription) {
+      this.state.subscription();
+    }
+    this.setState({
+      subscription: null
+    });
+  }
+  readDelNotification = async id => {
+    try {
+      await firebase
+        .firestore()
+        .collection("notifications")
+        .doc(id)
+        .delete();
+      console.log("Changed!!!");
+    } catch (err) {
+      console.log(err.message);
+    }
+  };
 
   render() {
-    // console.log(this.state.user);
     const photoURL = this.state.user ? this.state.user.photoURL : src1;
     return this.state.user ? (
       <React.Fragment>
@@ -86,68 +149,13 @@ class ProfilePage extends React.Component {
               </MDBCardBody>
             </MDBCard>
           </MDBCol>
+          <BookList
+            reqBooks
+            modalBook={this.state.modalBook}
+            toggleBook={this.toggleBook}
+          />
           <MDBCol md="6" lg="9">
             <section className="text-center pb-3">
-              <MDBRow className="d-flex justify-content-center">
-                <MDBCol lg="6" xl="5" className="mb-3">
-                  <MDBCard className="d-flex mb-5">
-                    <MDBView>
-                      <img
-                        src="https://mdbootstrap.com/img/Mockups/Horizontal/6-col/pro-profile-page.jpg"
-                        alt="Project"
-                        className="img-fluid"
-                      />
-                      <MDBMask overlay="white-slight" />
-                    </MDBView>
-                    <MDBCardBody>
-                      <MDBCardTitle className="font-bold mb-3">
-                        <strong>Project name</strong>
-                      </MDBCardTitle>
-                      <MDBCardText>
-                        Some quick example text to build on the card title and
-                        make up the bulk of the card's content.
-                      </MDBCardText>
-                    </MDBCardBody>
-                    <MDBCardFooter className="links-light profile-card-footer">
-                      <span className="right">
-                        <a className="p-2" href="#profile">
-                          Live Preview
-                          <MDBIcon icon="image" className="ml-1" />
-                        </a>
-                      </span>
-                    </MDBCardFooter>
-                  </MDBCard>
-                </MDBCol>
-                <MDBCol lg="6" xl="5" className="mb-3">
-                  <MDBCard className="d-flex mb-5">
-                    <MDBView>
-                      <img
-                        src="https://mdbootstrap.com/img/Mockups/Horizontal/6-col/pro-signup.jpg"
-                        alt="Project"
-                        className="img-fluid"
-                      />
-                      <MDBMask overlay="white-slight" />
-                    </MDBView>
-                    <MDBCardBody>
-                      <MDBCardTitle className="font-bold mb-3">
-                        <strong>Project name</strong>
-                      </MDBCardTitle>
-                      <MDBCardText>
-                        Some quick example text to build on the card title and
-                        make up the bulk of the card's content.
-                      </MDBCardText>
-                    </MDBCardBody>
-                    <MDBCardFooter className="links-light profile-card-footer">
-                      <span className="right">
-                        <a className="p-2" href="#profile">
-                          Live Preview
-                          <MDBIcon icon="image" className="ml-1" />
-                        </a>
-                      </span>
-                    </MDBCardFooter>
-                  </MDBCard>
-                </MDBCol>
-              </MDBRow>
               <MDBRow className="d-flex justify-content-center">
                 <MDBCol lg="6" xl="5" className="mb-3">
                   <MDBCard className="d-flex mb-5">

@@ -178,7 +178,8 @@ export class BookModal extends React.Component {
     super(props);
     this.state = {
       isDeleting: false,
-      gettingBook: false
+      gettingBook: false,
+      askingBook: false
     };
   }
 
@@ -210,6 +211,18 @@ export class BookModal extends React.Component {
     });
   };
 
+  askBook = () => {
+    console.log("Asking book");
+    this.setState({
+      askingBook: true
+    });
+    this.props.askBook(this.props.book).then(() => {
+      this.setState({
+        askingBook: false
+      });
+      this.props.toggle();
+    });
+  };
   render() {
     return (
       <React.Fragment>
@@ -261,6 +274,19 @@ export class BookModal extends React.Component {
               </MDBContainer>
             </MDBModalBody>
             <MDBModalFooter>
+              {this.props.user.uid != this.props.book.owner &&
+                this.props.book.owner == this.props.book.currentHolder &&
+                this.props.askBook && (
+                  <MDBBtn
+                    disabled={this.state.askingBook}
+                    onClick={this.askBook}
+                    color="unique"
+                  >
+                    {this.state.gettingBook
+                      ? "Requesting..."
+                      : "Request the book"}
+                  </MDBBtn>
+                )}
               {this.props.user.uid == this.props.book.owner &&
                 this.props.user.uid != this.props.book.currentHolder && (
                   <MDBBtn
@@ -392,7 +418,23 @@ class BookList extends React.Component {
       });
     });
   };
-
+  askBook = book => {
+    return firebase
+      .firestore()
+      .collection("requests")
+      .doc()
+      .set({
+        bookId: book.uid,
+        newHolderId: this.state.user.uid,
+        ownerId: book.owner
+      })
+      .then(() => {
+        console.log("requested!");
+      })
+      .catch(err => {
+        console.log(err.message);
+      });
+  };
   getBook = async currentHolder => {
     const notRef = firebase
       .firestore()
@@ -462,6 +504,33 @@ class BookList extends React.Component {
         });
       });
   }
+  loadReqBooks = () => {
+    firebase
+      .firestore()
+      .collection("requests")
+      .where("ownerId", "==", String(this.state.user.uid))
+      .get()
+      .then(reqs => {
+        reqs.forEach(req => {
+          firebase
+            .firestore()
+            .collection("books")
+            .doc(String(req.data().bookId))
+            .get()
+            .then(book => {
+              this.setState({
+                books: [...this.state.books, book.data()]
+              });
+            })
+            .catch(err => {
+              console.log(err.message);
+            });
+        });
+      })
+      .catch(err => {
+        console.log(err.message);
+      });
+  };
   componentDidMount() {
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
@@ -477,7 +546,9 @@ class BookList extends React.Component {
                   user: data.data()
                 },
                 () => {
-                  if (this.props.markedBooks) {
+                  if (this.props.reqBooks) {
+                    this.loadReqBooks();
+                  } else if (this.props.markedBooks) {
                     this.loadMarkedBooks();
                   } else if (this.props.allBooks) {
                     this.loadAllBooks();
@@ -489,7 +560,7 @@ class BookList extends React.Component {
             });
           })
           .catch(err => {
-            // console.log("Error user from users collection", err);
+            console.log("Error user from users collection", err);
             this.setState({
               user: null,
               books: []
@@ -525,7 +596,6 @@ class BookList extends React.Component {
     const { user } = this.state;
     const { books } = this.state;
     const splitBooks = this.split(books, booksInRow);
-
     const bookCardsTable = splitBooks.map(block => {
       return (
         <div key={block[0].uid}>
@@ -566,6 +636,7 @@ class BookList extends React.Component {
           updateBook={this.updateBook}
           deleteBook={this.deleteBook}
           getBook={this.getBook}
+          askBook={this.askBook}
         />
       </React.Fragment>
     );

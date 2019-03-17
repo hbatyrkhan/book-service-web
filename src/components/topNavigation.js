@@ -142,9 +142,6 @@ class TopNavigation extends Component {
           newestOnTop={true}
           autoClose={5000}
         />
-        <MDBNavbarBrand href="/">
-          <strong>MDB</strong>
-        </MDBNavbarBrand>
         <MDBNavbarToggler onClick={this.onClick} />
         <MDBCollapse isOpen={this.state.collapse} navbar>
           <MDBNavbarNav left>
@@ -157,12 +154,16 @@ class TopNavigation extends Component {
             <MDBNavItem>
               <MDBNavLink to="/books">Books</MDBNavLink>
             </MDBNavItem>
-            <MDBNavItem>
-              <MDBNavLink to="/maps">Maps</MDBNavLink>
-            </MDBNavItem>
-            <MDBNavItem>
-              <MDBNavLink to="/404">404 Page</MDBNavLink>
-            </MDBNavItem>
+            {false && (
+              <MDBNavItem>
+                <MDBNavLink to="/maps">Maps</MDBNavLink>
+              </MDBNavItem>
+            )}
+            {false && (
+              <MDBNavItem>
+                <MDBNavLink to="/404">404 Page</MDBNavLink>
+              </MDBNavItem>
+            )}
           </MDBNavbarNav>
           <MDBNavbarNav right>
             {!this.state.user && (

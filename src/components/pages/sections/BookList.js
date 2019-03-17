@@ -25,8 +25,27 @@ export class BookCard extends React.Component {
     super(props);
 
     this.state = {
-      book: this.props.book
+      book: this.props.book,
+      currentHolder: ""
     };
+  }
+
+  componentDidMount() {
+    firebase
+      .firestore()
+      .collection("users")
+      .where("uid", "==", this.props.book.currentHolder)
+      .get()
+      .then(snapshot => {
+        snapshot.forEach(data => {
+          this.setState({
+            currentHolder: data.data().fullname
+          });
+        });
+      })
+      .catch(err => {
+        console.log(err.message);
+      });
   }
 
   shortText = text => {
@@ -44,12 +63,14 @@ export class BookCard extends React.Component {
       <MDBCol>
         <MDBCard
           onClick={this.toggleBook}
-          style={{ height: "20rem", width: "12rem" }}
+          style={{ height: "23rem", width: "12rem" }}
         >
           <MDBCardBody>
-            <h5 className="font-weight-bold mb-3">{this.state.book.title}</h5>
+            <h5 className="font-weight-bold mb-3">
+              {this.state.book.title} by {this.state.book.author}
+            </h5>
             <p className="font-weight-bold grey-text">
-              by {this.state.book.author}
+              current user: {this.state.currentHolder}
             </p>
             <MDBCardText>
               {this.shortText(this.state.book.description)}

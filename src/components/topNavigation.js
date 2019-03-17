@@ -51,16 +51,17 @@ class TopNavigation extends Component {
                             doc.doc.data().toUser === data.data().uid &&
                             doc.doc.data().isRead === false
                           ) {
-                            toast.info(
-                              doc.doc.data().fromUser +
-                                ": " +
-                                doc.doc.data().message,
-                              {
-                                autoClose: false
-                              }
-                            );
+                            self.readDelNotification(doc.doc.id).then(() => {
+                              toast.info(
+                                doc.doc.data().fromUser +
+                                  ": " +
+                                  doc.doc.data().message,
+                                {
+                                  autoClose: false
+                                }
+                              );
+                            });
                             console.log("Should have seen this notify action");
-                            self.readDelNotification(doc.doc.id);
                           }
                         }
                       });
@@ -93,7 +94,7 @@ class TopNavigation extends Component {
     });
   }
   readDelNotification = id => {
-    firebase
+    return firebase
       .firestore()
       .collection("notifications")
       .doc(id)
@@ -150,6 +151,9 @@ class TopNavigation extends Component {
   };
   signOut = e => {
     const self = this;
+    if (this.state.subscription) {
+      this.state.subscription();
+    }
     firebase
       .auth()
       .signOut()
@@ -157,7 +161,8 @@ class TopNavigation extends Component {
         // Sign-out successful.
         self.setState(
           {
-            user: null
+            user: null,
+            subscription: null
           },
           () => {
             toast.success("Logged out", { position: "top-right" });

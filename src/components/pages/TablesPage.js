@@ -20,7 +20,7 @@ class TablesPage extends React.Component {
         firebase
           .firestore()
           .collection("users")
-          .where("uid", "==", String(user.uid))
+          .where("id", "==", String(user.uid))
           .get()
           .then(new_user => {
             new_user.forEach(data => {
@@ -62,7 +62,6 @@ class TablesPage extends React.Component {
                 <h4 className="h4-responsive text-white">Books page</h4>
               </MDBView>
               <MDBCardBody>
-                <BookAddForm />
                 <h3 className="mt-5 text-left">
                   <strong>
                     Currently you have these books in your account:
@@ -70,7 +69,7 @@ class TablesPage extends React.Component {
                 </h3>
                 <p />
                 <BookList
-                  userType="currentHolder"
+                  userType="currentUserId"
                   modalBook={this.state.modalBook}
                   toggleBook={this.toggleBook}
                 />
@@ -79,7 +78,7 @@ class TablesPage extends React.Component {
                 </h3>
                 <p />
                 <BookList
-                  userType="owner"
+                  userType="ownerUserId"
                   modalBook={this.state.modalBook}
                   toggleBook={this.toggleBook}
                 />
@@ -92,6 +91,10 @@ class TablesPage extends React.Component {
                   modalBook={this.state.modalBook}
                   toggleBook={this.toggleBook}
                 />
+                <p />
+                <br />
+                <br />
+                <BookAddForm />
               </MDBCardBody>
             </MDBCard>
           </MDBCol>

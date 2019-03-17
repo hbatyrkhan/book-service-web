@@ -27,7 +27,7 @@ class DashboardPage extends React.Component {
         firebase
           .firestore()
           .collection("users")
-          .where("uid", "==", String(user.uid))
+          .where("id", "==", String(user.uid))
           .get()
           .then(new_user => {
             new_user.forEach(data => {
@@ -40,7 +40,7 @@ class DashboardPage extends React.Component {
             });
           })
           .catch(err => {
-            // console.log("Error user from users collection", err);
+            console.log("Error user from users collection", err);
             this.setState({
               user: null
             });
@@ -71,12 +71,14 @@ class DashboardPage extends React.Component {
         <BreadcrumSection handler={this.handlerInput} />
         {false && <AdminCardSection1 />}
         {false && <ChartSection1 />}
-        <BookList
-          allBooks
-          queryInput={this.state.queryInput}
-          modalBook={this.state.modalBook}
-          toggleBook={this.toggleBook}
-        />
+        {
+          <BookList
+            allBooks
+            queryInput={this.state.queryInput}
+            modalBook={this.state.modalBook}
+            toggleBook={this.toggleBook}
+          />
+        }
       </React.Fragment>
     );
   }

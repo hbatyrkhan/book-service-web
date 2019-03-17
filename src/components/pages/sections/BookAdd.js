@@ -49,8 +49,8 @@ class BookAddForm extends React.Component {
         publisher: this.state.publisher,
         description: this.state.description,
         usersLiked: [],
-        owner: this.state.user.uid,
-        currentHolder: this.state.user.uid
+        ownerUserId: this.state.user.id,
+        currentUserId: this.state.user.id
       })
       .then(ref => {
         console.log("Added book with ID: ", ref.id);

@@ -1,12 +1,12 @@
 import firebase from "firebase";
 
 const config = {
-  apiKey: "AIzaSyAJrNwmd6oK7H51QWLqwzFw-X72q_gGC4Q",
-  authDomain: "hack-6c42a.firebaseapp.com",
-  databaseURL: "https://hack-6c42a.firebaseio.com",
-  projectId: "hack-6c42a",
-  storageBucket: "hack-6c42a.appspot.com",
-  messagingSenderId: "167776128050"
+  apiKey: "AIzaSyDy0F3-cJBQETE2kxRABluD-X-ekFEWm8k",
+  authDomain: "hack-btsd.firebaseapp.com",
+  databaseURL: "https://hack-btsd.firebaseio.com",
+  projectId: "hack-btsd",
+  storageBucket: "hack-btsd.appspot.com",
+  messagingSenderId: "614557167245"
 };
 
 firebase.initializeApp(config);

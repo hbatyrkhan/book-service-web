@@ -18,7 +18,7 @@ import {
   Card
 } from "mdbreact";
 
-const booksInRow = 5;
+const booksInRow = 4;
 
 export class BookCard extends React.Component {
   constructor(props) {
@@ -26,21 +26,22 @@ export class BookCard extends React.Component {
 
     this.state = {
       book: this.props.book,
-      currentHolder: "",
+      current: "",
       owner: ""
     };
   }
 
   componentDidMount() {
+    console.log(this.props.book.currentUserId);
     firebase
       .firestore()
       .collection("users")
-      .where("uid", "==", this.props.book.currentHolder)
+      .where("id", "==", this.props.book.currentUserId)
       .get()
       .then(snapshot => {
         snapshot.forEach(data => {
           this.setState({
-            currentHolder: data.data().fullname
+            current: data.data().fullname
           });
         });
       })
@@ -50,7 +51,7 @@ export class BookCard extends React.Component {
     firebase
       .firestore()
       .collection("users")
-      .where("uid", "==", this.props.book.owner)
+      .where("id", "==", this.props.book.ownerUserId)
       .get()
       .then(snapshot => {
         snapshot.forEach(data => {
@@ -79,17 +80,17 @@ export class BookCard extends React.Component {
       <MDBCol>
         <MDBCard
           onClick={this.toggleBook}
-          style={{ height: "30rem", width: "12rem" }}
+          style={{ height: "30rem", width: "15rem" }}
         >
           <MDBCardBody>
             <h5 className="font-weight-bold mb-3">
               {this.state.book.title} by {this.state.book.author}
             </h5>
             <p className="font-weight-bold grey-text">
-              current user: {this.state.currentHolder}
+              current user: {this.state.current}
             </p>
             <p className="font-weight-bold grey-text">
-              Owner: {this.state.owner}
+              owner: {this.state.owner}
             </p>
             <MDBCardText>
               {this.shortText(this.state.book.description)}
@@ -231,7 +232,7 @@ export class BookModal extends React.Component {
       isDeleting: true
     });
 
-    this.props.deleteBook(this.props.book.uid).then(() => {
+    this.props.deleteBook(this.props.book.id).then(() => {
       this.setState({
         isDeleting: false
       });
@@ -282,11 +283,11 @@ export class BookModal extends React.Component {
 
   getBook = () => {
     console.log("Getting book");
-    console.log(this.props.book.currentHolder, this.props.user.uid);
+    console.log(this.props.book.currentUserId, this.props.user.id);
     this.setState({
       gettingBook: true
     });
-    this.props.getBook(this.props.book.currentHolder).then(() => {
+    this.props.getBook(this.props.book.currentUserId).then(() => {
       this.setState({
         gettingBook: false
       });
@@ -337,40 +338,48 @@ export class BookModal extends React.Component {
                     name="title"
                     label="Title"
                     value={this.props.book.title}
-                    bookId={this.props.book.uid}
-                    editable={this.props.book.owner === this.props.user.uid}
+                    bookId={this.props.book.id}
+                    editable={
+                      this.props.book.ownerUserId === this.props.user.id
+                    }
                     updateBook={this.props.updateBook}
                   />
                   <BookField
                     name="author"
                     label="Author"
                     value={this.props.book.author}
-                    bookId={this.props.book.uid}
-                    editable={this.props.book.owner === this.props.user.uid}
+                    bookId={this.props.book.id}
+                    editable={
+                      this.props.book.ownerUserId === this.props.user.id
+                    }
                     updateBook={this.props.updateBook}
                   />
                   <BookField
                     name="publisher"
                     label="Publisher"
                     value={this.props.book.publisher}
-                    bookId={this.props.book.uid}
-                    editable={this.props.book.owner === this.props.user.uid}
+                    bookId={this.props.book.id}
+                    editable={
+                      this.props.book.ownerUserId === this.props.user.id
+                    }
                     updateBook={this.props.updateBook}
                   />
                   <BookField
                     name="description"
                     label="Description"
                     value={this.props.book.description}
-                    bookId={this.props.book.uid}
-                    editable={this.props.book.owner === this.props.user.uid}
+                    bookId={this.props.book.id}
+                    editable={
+                      this.props.book.ownerUserId === this.props.user.id
+                    }
                     updateBook={this.props.updateBook}
                   />
                 </React.Fragment>
               </MDBContainer>
             </MDBModalBody>
             <MDBModalFooter>
-              {this.props.user.uid != this.props.book.owner &&
-                this.props.book.owner == this.props.book.currentHolder &&
+              {this.props.user.id != this.props.book.ownerUserId &&
+                this.props.book.ownerUserId == this.props.book.currentUserId &&
                 this.props.askBook && (
                   <MDBBtn
                     disabled={this.state.askingBook}
@@ -382,8 +391,8 @@ export class BookModal extends React.Component {
                       : "Request the book"}
                   </MDBBtn>
                 )}
-              {this.props.user.uid == this.props.book.currentHolder &&
-                this.props.book.owner != this.props.book.currentHolder &&
+              {this.props.user.id == this.props.book.currentUserId &&
+                this.props.book.ownerUserId != this.props.book.currentUserId &&
                 this.props.askBookRet && (
                   <MDBBtn
                     disabled={this.state.askingBook}
@@ -413,8 +422,9 @@ export class BookModal extends React.Component {
                   {this.state.rejecting ? "Rejecting..." : "Reject the request"}
                 </MDBBtn>
               )}
-              {this.props.user.uid == this.props.book.owner &&
-                this.props.user.uid != this.props.book.currentHolder && (
+              {this.props.user.id == this.props.book.ownerUserId &&
+                this.props.book.currentUserId !=
+                  this.props.book.ownerUserId && (
                   <MDBBtn
                     disabled={this.state.gettingBook}
                     onClick={this.getBook}
@@ -423,7 +433,7 @@ export class BookModal extends React.Component {
                     {this.state.gettingBook ? "Getting back..." : "Get back"}
                   </MDBBtn>
                 )}
-              {this.props.user.uid == this.props.book.owner && (
+              {this.props.user.id == this.props.book.ownerUserId && (
                 <MDBBtn
                   disabled={this.state.isDeleting}
                   onClick={this.deleteBook}
@@ -497,8 +507,8 @@ class BookList extends React.Component {
   };
   loadBook = snapshot => {
     let book = snapshot.data();
-    //   console.log("Book ", book);
-    book.uid = snapshot.id;
+    // console.log("Book ", book);
+    book.id = snapshot.id;
     const self = this;
     const tmp_books = [...this.state.books, book];
     tmp_books.sort(function(item1, item2) {
@@ -517,7 +527,7 @@ class BookList extends React.Component {
     return bookRef.update({ [name]: value }).then(() => {
       const { books } = this.state;
       for (let i = 0; i < books.length; ++i) {
-        if (books[i].uid === bookId) {
+        if (books[i].id === bookId) {
           books[i][name] = value;
         }
       }
@@ -535,7 +545,7 @@ class BookList extends React.Component {
     return bookRef.delete().then(() => {
       const { books } = this.state;
       for (let i = 0; i < books.length; ++i) {
-        if (books[i].uid === bookId) {
+        if (books[i].id === bookId) {
           books.splice(i, 1);
           break;
         }
@@ -551,9 +561,9 @@ class BookList extends React.Component {
       .collection("requests")
       .doc()
       .set({
-        bookId: book.uid,
-        newHolderUserId: this.state.user.uid,
-        ownerUserId: book.owner
+        bookId: book.id,
+        newHolderUserId: this.state.user.id,
+        ownerUserId: book.ownerUserId
       })
       .then(() => {
         console.log("requested!");
@@ -568,9 +578,9 @@ class BookList extends React.Component {
       .collection("returnRequests")
       .doc()
       .set({
-        bookId: book.uid,
-        currentUserId: this.state.user.uid,
-        ownerUserId: book.owner
+        bookId: book.id,
+        currentUserId: this.state.user.id,
+        ownerUserId: book.ownerUserId
       })
       .then(() => {
         console.log("requested!");
@@ -583,9 +593,9 @@ class BookList extends React.Component {
     return firebase
       .firestore()
       .collection("books")
-      .doc(String(book.uid))
+      .doc(String(book.id))
       .update({
-        currentHolder: book.person
+        currentUserId: book.person
       })
       .then(() => {
         console.log("accepted!");
@@ -595,7 +605,7 @@ class BookList extends React.Component {
       });
   };
 
-  getBook = async currentHolder => {
+  getBook = async currentUserId => {
     const notRef = firebase
       .firestore()
       .collection("notifications")
@@ -605,7 +615,7 @@ class BookList extends React.Component {
         fromUser: this.state.user.fullname,
         isRead: false,
         message: "can you give me back my book?",
-        toUser: currentHolder
+        toUser: currentUserId
       });
       console.log("notified!");
     } catch (err) {
@@ -617,7 +627,7 @@ class BookList extends React.Component {
     const db = firebase.firestore();
     return db
       .collection("books")
-      .where(String(this.props.userType), "==", String(this.state.user.uid))
+      .where(String(this.props.userType), "==", String(this.state.user.id))
       .get()
       .then(snapshot => {
         snapshot.forEach(this.loadBook);
@@ -665,11 +675,11 @@ class BookList extends React.Component {
       });
   }
   loadReqBooks = type => {
-    const ownerId = "ownerUserId";
+    const ownerUserId = "ownerUserId";
     return firebase
       .firestore()
       .collection(String(type))
-      .where(String(ownerId), "==", String(this.state.user.uid))
+      .where(String(ownerUserId), "==", String(this.state.user.id))
       .get()
       .then(reqs => {
         reqs.forEach(req => {
@@ -680,7 +690,7 @@ class BookList extends React.Component {
             .get()
             .then(book => {
               let new_book = book.data();
-              new_book.uid = book.id;
+              new_book.id = book.id;
               if (type == "requests") {
                 new_book.person = req.data().newHolderUserId;
               } else {
@@ -707,7 +717,7 @@ class BookList extends React.Component {
         firebase
           .firestore()
           .collection("users")
-          .where("uid", "==", String(user.uid))
+          .where("id", "==", String(user.uid))
           .get()
           .then(new_user => {
             new_user.forEach(data => {
@@ -791,19 +801,20 @@ class BookList extends React.Component {
   render() {
     const { user } = this.state;
     const { books } = this.state;
+    console.log(books);
     const splitBooks = this.split(books, booksInRow);
     const bookCardsTable = splitBooks.map(block => {
       return (
-        <div key={block[0].uid}>
+        <div key={block[0].id}>
           <MDBRow>
             {block.map((book, index) => {
               return (
-                <React.Fragment key={book === null ? index : book.uid}>
+                <React.Fragment key={book === null ? index : book.id}>
                   {book != null ? (
                     <BookCard
                       toggleBook={this.toggleBook}
                       book={book}
-                      key={book.uid}
+                      key={book.id}
                     />
                   ) : (
                     <MDBCol />

@@ -40,7 +40,7 @@ class ProfilePage extends React.Component {
         firebase
           .firestore()
           .collection("users")
-          .where("uid", "==", String(user.uid))
+          .where("id", "==", String(user.uid))
           .get()
           .then(new_user => {
             new_user.forEach(data => {
@@ -80,7 +80,7 @@ class ProfilePage extends React.Component {
   };
 
   render() {
-    const photoURL = this.state.user ? this.state.user.photoURL : src1;
+    const photoURL = this.state.user ? this.state.user.imageUrl : src1;
     return this.state.user ? (
       <React.Fragment>
         <MDBRow className="justify-content-center">

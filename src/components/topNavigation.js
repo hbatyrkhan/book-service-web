@@ -29,7 +29,7 @@ class TopNavigation extends Component {
         firebase
           .firestore()
           .collection("users")
-          .where("uid", "==", String(user.uid))
+          .where("id", "==", String(user.uid))
           .get()
           .then(new_user => {
             new_user.forEach(data => {
@@ -47,10 +47,7 @@ class TopNavigation extends Component {
                         // console.log(doc.doc.data().toUser, data.data().uid);
                         // console.log(doc.doc.data().isRead);
                         if (doc.type === "added") {
-                          if (
-                            doc.doc.data().toUser === data.data().uid &&
-                            doc.doc.data().isRead === false
-                          ) {
+                          if (doc.doc.data().toUser === data.data().id) {
                             self.readDelNotification(doc.doc.id).then(() => {
                               toast.info(
                                 doc.doc.data().fromUser +
@@ -118,7 +115,7 @@ class TopNavigation extends Component {
       .signInWithPopup(providerGoogle)
       .then(function(result) {
         const user = result.user;
-        console.log(user.photoURL);
+        // console.log(user.ima);
         //   console.log(user.uid);
         self.addUser(user);
         toast.success("Successfully logged in", { position: "top-right" });
@@ -175,10 +172,10 @@ class TopNavigation extends Component {
       });
   };
   addUser = user => {
-    console.log("Here ", user.photoURL);
+    // console.log("Here ", user.photoURL);
     const db = firebase.firestore();
     db.collection("users")
-      .where("uid", "==", user.uid)
+      .where("id", "==", user.uid)
       .get()
       .then(snapshot => {
         let ok = 1;
@@ -192,8 +189,8 @@ class TopNavigation extends Component {
             .add({
               fullname: String(user.displayName),
               email: String(user.email),
-              uid: String(user.uid),
-              photoUrl: String(user.photoURL)
+              id: String(user.uid),
+              imageUrl: String(user.photoURL)
             })
             .then(function(docRef) {
               console.log("Document written with ID: ", docRef.id);

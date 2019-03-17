@@ -179,7 +179,9 @@ export class BookModal extends React.Component {
     this.state = {
       isDeleting: false,
       gettingBook: false,
-      askingBook: false
+      askingBook: false,
+      accepting: false,
+      rejecting: false
     };
   }
 
@@ -195,6 +197,47 @@ export class BookModal extends React.Component {
       });
       this.props.toggle();
     });
+  };
+  deleteRequest = () => {
+    return firebase
+      .firestore()
+      .collection("requests")
+      .doc(String(this.props.book.reqId))
+      .delete()
+      .then(() => {
+        console.log("Deleted Request!!!");
+      })
+      .catch(err => {
+        console.log(err.message);
+      });
+  };
+  acceptBook = () => {
+    console.log("Accepting book");
+    this.setState({
+      accepting: true
+    });
+    this.deleteRequest()
+      .then(() => {
+        this.props.acceptBook(this.props.book).then(() => {
+          this.setState({
+            accepting: false
+          });
+          this.props.toggle();
+        });
+      })
+      .catch(err => {
+        console.log(err.message);
+      });
+  };
+  rejectBook = () => {
+    console.log("Rejecting book");
+    this.setState({
+      rejecting: true
+    });
+    this.setState({
+      rejecting: false
+    });
+    this.props.toggle();
   };
 
   getBook = () => {
@@ -287,6 +330,24 @@ export class BookModal extends React.Component {
                       : "Request the book"}
                   </MDBBtn>
                 )}
+              {this.props.book.person && (
+                <MDBBtn
+                  disabled={this.state.accepting}
+                  onClick={this.acceptBook}
+                  color="dark-green"
+                >
+                  {this.state.accepting ? "Accepting..." : "Accept the request"}
+                </MDBBtn>
+              )}
+              {this.props.book.person && (
+                <MDBBtn
+                  disabled={this.state.rejecting}
+                  onClick={this.rejectBook}
+                  color="pink"
+                >
+                  {this.state.accepting ? "Rejecting..." : "Reject the request"}
+                </MDBBtn>
+              )}
               {this.props.user.uid == this.props.book.owner &&
                 this.props.user.uid != this.props.book.currentHolder && (
                   <MDBBtn
@@ -435,6 +496,22 @@ class BookList extends React.Component {
         console.log(err.message);
       });
   };
+  acceptBook = book => {
+    return firebase
+      .firestore()
+      .collection("books")
+      .doc(String(book.uid))
+      .update({
+        currentHolder: book.person
+      })
+      .then(() => {
+        console.log("accepted!");
+      })
+      .catch(err => {
+        console.log(err.message);
+      });
+  };
+
   getBook = async currentHolder => {
     const notRef = firebase
       .firestore()
@@ -518,8 +595,12 @@ class BookList extends React.Component {
             .doc(String(req.data().bookId))
             .get()
             .then(book => {
+              let new_book = book.data();
+              new_book.uid = book.id;
+              new_book.person = req.data().newHolderId;
+              new_book.reqId = req.id;
               this.setState({
-                books: [...this.state.books, book.data()]
+                books: [...this.state.books, new_book]
               });
             })
             .catch(err => {
@@ -637,6 +718,7 @@ class BookList extends React.Component {
           deleteBook={this.deleteBook}
           getBook={this.getBook}
           askBook={this.askBook}
+          acceptBook={this.acceptBook}
         />
       </React.Fragment>
     );

@@ -102,6 +102,7 @@ class TopNavigation extends Component {
       });
   };
   addUser = user => {
+    console.log("Here ", user.photoURL);
     const db = firebase.firestore();
     db.collection("users")
       .where("uid", "==", user.uid)
@@ -119,7 +120,7 @@ class TopNavigation extends Component {
               fullname: String(user.displayName),
               email: String(user.email),
               uid: String(user.uid),
-              photoURL: String(user.photoURL)
+              photoUrl: String(user.photoURL)
             })
             .then(function(docRef) {
               console.log("Document written with ID: ", docRef.id);

@@ -6,6 +6,13 @@ import Footer from "./components/Footer";
 import "./index.css";
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      subscription: null,
+      user: null
+    };
+  }
   render() {
     return (
       <div className="flexible-content">

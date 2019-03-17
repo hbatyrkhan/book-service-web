@@ -177,7 +177,8 @@ export class BookModal extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isDeleting: false
+      isDeleting: false,
+      gettingBook: false
     };
   }
 
@@ -190,6 +191,20 @@ export class BookModal extends React.Component {
     this.props.deleteBook(this.props.book.uid).then(() => {
       this.setState({
         isDeleting: false
+      });
+      this.props.toggle();
+    });
+  };
+
+  getBook = () => {
+    console.log("Getting book");
+    console.log(this.props.book.currentHolder, this.props.user.uid);
+    this.setState({
+      gettingBook: true
+    });
+    this.props.getBook(this.props.book.currentHolder).then(() => {
+      this.setState({
+        gettingBook: false
       });
       this.props.toggle();
     });
@@ -246,13 +261,25 @@ export class BookModal extends React.Component {
               </MDBContainer>
             </MDBModalBody>
             <MDBModalFooter>
-              <MDBBtn
-                disabled={this.state.isDeleting}
-                onClick={this.deleteBook}
-                color="danger"
-              >
-                {this.state.isDeleting ? "Deleting..." : "Delete"}
-              </MDBBtn>
+              {this.props.user.uid == this.props.book.owner &&
+                this.props.user.uid != this.props.book.currentHolder && (
+                  <MDBBtn
+                    disabled={this.state.gettingBook}
+                    onClick={this.getBook}
+                    color="indigo"
+                  >
+                    {this.state.gettingBook ? "Getting back..." : "Get back"}
+                  </MDBBtn>
+                )}
+              {this.props.user.uid == this.props.book.owner && (
+                <MDBBtn
+                  disabled={this.state.isDeleting}
+                  onClick={this.deleteBook}
+                  color="danger"
+                >
+                  {this.state.isDeleting ? "Deleting..." : "Delete"}
+                </MDBBtn>
+              )}
             </MDBModalFooter>
           </MDBModal>
         )}
@@ -364,6 +391,24 @@ class BookList extends React.Component {
         books: books
       });
     });
+  };
+
+  getBook = async currentHolder => {
+    const notRef = firebase
+      .firestore()
+      .collection("notifications")
+      .doc();
+    try {
+      await notRef.set({
+        fromUser: this.state.user.fullname,
+        isRead: false,
+        message: "can you give me back my book?",
+        toUser: currentHolder
+      });
+      console.log("notified!");
+    } catch (err) {
+      console.log(err.message);
+    }
   };
 
   async loadBooks() {
@@ -520,6 +565,7 @@ class BookList extends React.Component {
           user={this.state.user}
           updateBook={this.updateBook}
           deleteBook={this.deleteBook}
+          getBook={this.getBook}
         />
       </React.Fragment>
     );

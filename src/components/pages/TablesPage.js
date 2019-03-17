@@ -59,13 +59,11 @@ class TablesPage extends React.Component {
           <MDBCol md="12">
             <MDBCard className="mt-5">
               <MDBView className="gradient-card-header blue darken-2">
-                <h4 className="h4-responsive text-white">Books page</h4>
+                <h4 className="h4-responsive text-white">Библиотека</h4>
               </MDBView>
               <MDBCardBody>
                 <h3 className="mt-5 text-left">
-                  <strong>
-                    Currently you have these books in your account:
-                  </strong>
+                  <strong>Одолженные книги</strong>
                 </h3>
                 <p />
                 <BookList
@@ -74,7 +72,7 @@ class TablesPage extends React.Component {
                   toggleBook={this.toggleBook}
                 />
                 <h3 className="mt-5 text-left">
-                  <strong>Books owned by you:</strong>
+                  <strong>Ваши книги</strong>
                 </h3>
                 <p />
                 <BookList
@@ -83,7 +81,7 @@ class TablesPage extends React.Component {
                   toggleBook={this.toggleBook}
                 />
                 <h3 className="mt-5 text-left">
-                  <strong>Marked books:</strong>
+                  <strong>Избранные книги:</strong>
                 </h3>
                 <p />
                 <BookList

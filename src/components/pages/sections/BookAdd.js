@@ -93,9 +93,9 @@ class BookAddForm extends React.Component {
       <React.Fragment>
         <MDBContainer>
           <form>
-            <p className="h4 text-center mb-4">Add a book</p>
+            <p className="h4 text-center mb-4">Добавить книгу</p>
             <label htmlFor="bookForm.title" className="grey-text">
-              Title
+              Название
             </label>
             <input
               value={this.state.title}
@@ -107,7 +107,7 @@ class BookAddForm extends React.Component {
             />
             <br />
             <label htmlFor="bookForm.author" className="grey-text">
-              Author
+              Автор
             </label>
             <input
               value={this.state.author}
@@ -119,7 +119,7 @@ class BookAddForm extends React.Component {
             />
             <br />
             <label htmlFor="bookForm.publisher" className="grey-text">
-              Publisher
+              Издание
             </label>
             <input
               value={this.state.publisher}
@@ -131,7 +131,7 @@ class BookAddForm extends React.Component {
             />
             <br />
             <label htmlFor="bookForm.description" className="grey-text">
-              Description
+              Описание
             </label>
             <input
               value={this.state.description}
@@ -144,7 +144,7 @@ class BookAddForm extends React.Component {
             />
             <div className="text-center mt-4">
               <MDBBtn onClick={this.addBook} color="unique">
-                Add
+                Добавить
               </MDBBtn>
             </div>
           </form>

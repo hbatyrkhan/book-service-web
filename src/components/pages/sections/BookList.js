@@ -15,7 +15,7 @@ import {
   MDBBtn,
   MDBIcon,
   MDBModalFooter,
-  Card
+  MDBCardImage
 } from "mdbreact";
 
 const booksInRow = 4;
@@ -65,8 +65,8 @@ export class BookCard extends React.Component {
       });
   }
 
-  shortText = text => {
-    const limit = this.props.charLimit || 170;
+  shortText = (text, charLimit) => {
+    const limit = charLimit;
     if (text.length > limit) return text.substring(0, limit) + "...";
     return text.substring(0, text.length);
   };
@@ -80,20 +80,28 @@ export class BookCard extends React.Component {
       <MDBCol>
         <MDBCard
           onClick={this.toggleBook}
-          style={{ height: "30rem", width: "15rem" }}
+          style={{ height: "35rem", width: "15rem" }}
         >
+          <MDBCol>
+            <img
+              src={this.state.book.imageUrl}
+              className="rounded mx-auto d-block"
+              alt=""
+            />
+          </MDBCol>
           <MDBCardBody>
             <h5 className="font-weight-bold mb-3">
-              {this.state.book.title} by {this.state.book.author}
+              {this.shortText(this.state.book.title, 20)} by{" "}
+              {this.shortText(this.state.book.author, 20)}
             </h5>
             <p className="font-weight-bold grey-text">
-              current user: {this.state.current}
+              Книга сейчас у {this.shortText(this.state.current, 15)}
             </p>
             <p className="font-weight-bold grey-text">
-              owner: {this.state.owner}
+              Хозаин книги {this.shortText(this.state.owner, 15)}
             </p>
             <MDBCardText>
-              {this.shortText(this.state.book.description)}
+              {this.shortText(this.state.book.description, 170)}
             </MDBCardText>
           </MDBCardBody>
         </MDBCard>
@@ -179,14 +187,14 @@ export class BookField extends React.Component {
                     onClick={this.updateBook}
                     color="primary"
                   >
-                    {this.state.isUpdating ? "Updating..." : "Update"}
+                    {this.state.isUpdating ? "Обновление..." : "Обновить"}
                   </MDBBtn>
                   <MDBBtn
                     disabled={this.state.isUpdating}
                     onClick={this.cancelEdit}
                     color="grey"
                   >
-                    Cancel
+                    Отменить
                   </MDBBtn>
                 </MDBCol>
               </MDBRow>
@@ -197,7 +205,7 @@ export class BookField extends React.Component {
                   <MDBCol>
                     {this.state.isUpdating ? (
                       <MDBBtn disabled={true} color="primary">
-                        Updating...
+                        Обновление...
                       </MDBBtn>
                     ) : (
                       <MDBIcon onClick={this.toggleEdit} icon="edit" />
@@ -329,14 +337,14 @@ export class BookModal extends React.Component {
             toggle={this.props.toggle}
           >
             <MDBModalHeader toggle={this.props.toggle}>
-              Book Details
+              Информация о книге
             </MDBModalHeader>
             <MDBModalBody>
               <MDBContainer>
                 <React.Fragment>
                   <BookField
                     name="title"
-                    label="Title"
+                    label="Название"
                     value={this.props.book.title}
                     bookId={this.props.book.id}
                     editable={
@@ -346,7 +354,7 @@ export class BookModal extends React.Component {
                   />
                   <BookField
                     name="author"
-                    label="Author"
+                    label="Автор"
                     value={this.props.book.author}
                     bookId={this.props.book.id}
                     editable={
@@ -356,7 +364,7 @@ export class BookModal extends React.Component {
                   />
                   <BookField
                     name="publisher"
-                    label="Publisher"
+                    label="Издание"
                     value={this.props.book.publisher}
                     bookId={this.props.book.id}
                     editable={
@@ -366,7 +374,7 @@ export class BookModal extends React.Component {
                   />
                   <BookField
                     name="description"
-                    label="Description"
+                    label="Описание"
                     value={this.props.book.description}
                     bookId={this.props.book.id}
                     editable={
@@ -387,8 +395,8 @@ export class BookModal extends React.Component {
                     color="unique"
                   >
                     {this.state.gettingBook
-                      ? "Requesting..."
-                      : "Request the book"}
+                      ? "Запрос идет..."
+                      : "Запросить книгу"}
                   </MDBBtn>
                 )}
               {this.props.user.id == this.props.book.currentUserId &&
@@ -400,8 +408,8 @@ export class BookModal extends React.Component {
                     color="unique"
                   >
                     {this.state.gettingBook
-                      ? "Requesting..."
-                      : "Return the book"}
+                      ? "Запрос идет..."
+                      : "Запросить книгу назад"}
                   </MDBBtn>
                 )}
               {this.props.book.person && (
@@ -410,7 +418,7 @@ export class BookModal extends React.Component {
                   onClick={this.acceptBook}
                   color="dark-green"
                 >
-                  {this.state.accepting ? "Accepting..." : "Accept the request"}
+                  {this.state.accepting ? "Запрос идет..." : "Принять запрос"}
                 </MDBBtn>
               )}
               {this.props.book.person && (
@@ -419,7 +427,7 @@ export class BookModal extends React.Component {
                   onClick={this.rejectBook}
                   color="pink"
                 >
-                  {this.state.rejecting ? "Rejecting..." : "Reject the request"}
+                  {this.state.rejecting ? "Отменить..." : "Отменить запрос"}
                 </MDBBtn>
               )}
               {this.props.user.id == this.props.book.ownerUserId &&
@@ -430,7 +438,9 @@ export class BookModal extends React.Component {
                     onClick={this.getBook}
                     color="indigo"
                   >
-                    {this.state.gettingBook ? "Getting back..." : "Get back"}
+                    {this.state.gettingBook
+                      ? "Запрос идет..."
+                      : "Запросить книгу обратно"}
                   </MDBBtn>
                 )}
               {this.props.user.id == this.props.book.ownerUserId && (
@@ -439,7 +449,7 @@ export class BookModal extends React.Component {
                   onClick={this.deleteBook}
                   color="danger"
                 >
-                  {this.state.isDeleting ? "Deleting..." : "Delete"}
+                  {this.state.isDeleting ? "Удаление..." : "Удалить"}
                 </MDBBtn>
               )}
             </MDBModalFooter>
@@ -614,7 +624,7 @@ class BookList extends React.Component {
       await notRef.set({
         fromUser: this.state.user.fullname,
         isRead: false,
-        message: "can you give me back my book?",
+        message: "просит вас вернуть книгу",
         toUser: currentUserId
       });
       console.log("notified!");
@@ -839,11 +849,13 @@ class BookList extends React.Component {
           {this.state.ready && books.length === 0 && user && (
             <MDBCard>
               <MDBCardBody>
-                <MDBCardTitle>You have no books here.</MDBCardTitle>
+                <MDBCardTitle>У вас тут нету книг</MDBCardTitle>
               </MDBCardBody>
             </MDBCard>
           )}
-          {this.state.ready && !user && <p>Please, log in.</p>}
+          {this.state.ready && !user && (
+            <p>Пожалуйста, зайдите в свой аккаунт</p>
+          )}
         </MDBContainer>
         <BookModal
           isOpen={this.props.modalBook}

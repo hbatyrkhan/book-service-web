@@ -51,7 +51,7 @@ class TopNavigation extends Component {
                             self.readDelNotification(doc.doc.id).then(() => {
                               toast.info(
                                 doc.doc.data().fromUser +
-                                  ": " +
+                                  " " +
                                   doc.doc.data().message,
                                 {
                                   autoClose: false
@@ -216,13 +216,13 @@ class TopNavigation extends Component {
         <MDBCollapse isOpen={this.state.collapse} navbar>
           <MDBNavbarNav left>
             <MDBNavItem active>
-              <MDBNavLink to="/">Home</MDBNavLink>
+              <MDBNavLink to="/">Главная</MDBNavLink>
             </MDBNavItem>
             <MDBNavItem>
-              <MDBNavLink to="/profile">Profile</MDBNavLink>
+              <MDBNavLink to="/profile">Мой профиль</MDBNavLink>
             </MDBNavItem>
             <MDBNavItem>
-              <MDBNavLink to="/books">Books</MDBNavLink>
+              <MDBNavLink to="/books">Библиотека</MDBNavLink>
             </MDBNavItem>
             {false && (
               <MDBNavItem>
@@ -275,7 +275,7 @@ class TopNavigation extends Component {
             {this.state.user && (
               <MDBNavItem>
                 <span className="nav-link navbar-link">
-                  Hello, {this.state.user.fullname}
+                  Здавствуйте, {this.state.user.fullname}
                 </span>
               </MDBNavItem>
             )}
@@ -287,7 +287,7 @@ class TopNavigation extends Component {
                 className="border border-light rounded mr-1 nav-link Ripple-parent"
                 onClick={this.signOut}
               >
-                logout
+                выйти
               </MDBBtn>
             )}
           </MDBNavbarNav>

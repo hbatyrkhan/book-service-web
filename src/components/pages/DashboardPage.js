@@ -77,13 +77,6 @@ class DashboardPage extends React.Component {
           modalBook={this.state.modalBook}
           toggleBook={this.toggleBook}
         />
-        <TableSection />
-        <ChartSection2 />
-        <MDBRow className="mb-4">
-          <MapSection />
-          <ModalSection />
-        </MDBRow>
-        <AdminCardSection2 />
       </React.Fragment>
     );
   }

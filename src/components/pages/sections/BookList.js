@@ -1,7 +1,6 @@
 import React from "react";
 import firebase from "../../../Firestore";
 import {
-  MDBTableBody,
   MDBCard,
   MDBCardBody,
   MDBCardTitle,
@@ -15,7 +14,8 @@ import {
   MDBModalBody,
   MDBBtn,
   MDBIcon,
-  MDBModalFooter
+  MDBModalFooter,
+  Card
 } from "mdbreact";
 
 const booksInRow = 5;
@@ -447,7 +447,8 @@ class BookList extends React.Component {
       user: null,
       books: [],
       bookOpened: null,
-      queryInput: ""
+      queryInput: "",
+      ready: false
     };
   }
   componentWillReceiveProps(nextProps) {
@@ -665,7 +666,7 @@ class BookList extends React.Component {
   }
   loadReqBooks = type => {
     const ownerId = "ownerUserId";
-    firebase
+    return firebase
       .firestore()
       .collection(String(type))
       .where(String(ownerId), "==", String(this.state.user.uid))
@@ -716,14 +717,32 @@ class BookList extends React.Component {
                 },
                 () => {
                   if (this.props.reqBooks) {
-                    this.loadReqBooks("returnRequests");
-                    this.loadReqBooks("requests");
+                    this.loadReqBooks("returnRequests")
+                      .then(() => {
+                        this.loadReqBooks("requests");
+                      })
+                      .then(() => {
+                        this.setState({
+                          ready: true
+                        });
+                      });
                   } else if (this.props.markedBooks) {
                     this.loadMarkedBooks();
+                    this.setState({
+                      ready: true
+                    });
                   } else if (this.props.allBooks) {
-                    this.loadAllBooks();
+                    this.loadAllBooks().then(() => {
+                      this.setState({
+                        ready: true
+                      });
+                    });
                   } else {
-                    this.loadBooks();
+                    this.loadBooks().then(() => {
+                      this.setState({
+                        ready: true
+                      });
+                    });
                   }
                 }
               );
@@ -733,13 +752,20 @@ class BookList extends React.Component {
             console.log("Error user from users collection", err);
             this.setState({
               user: null,
-              books: []
+              books: [],
+              ready: true
+            });
+          })
+          .then(() => {
+            this.setState({
+              ready: true
             });
           });
       } else {
         this.setState({
           user: null,
-          books: []
+          books: [],
+          ready: true
         });
       }
     });
@@ -790,13 +816,23 @@ class BookList extends React.Component {
         </div>
       );
     });
-
     return (
       <React.Fragment>
         <MDBContainer className="flex-wrap">
           {bookCardsTable}
-          {books.length === 0 && user && <p>You have no books.</p>}
-          {!user && <p>Please, log in.</p>}
+          {!this.state.ready && (
+            <div class="spinner-border" role="status">
+              <span class="sr-only">Loading...</span>
+            </div>
+          )}
+          {this.state.ready && books.length === 0 && user && (
+            <MDBCard>
+              <MDBCardBody>
+                <MDBCardTitle>You have no books here.</MDBCardTitle>
+              </MDBCardBody>
+            </MDBCard>
+          )}
+          {this.state.ready && !user && <p>Please, log in.</p>}
         </MDBContainer>
         <BookModal
           isOpen={this.props.modalBook}
